@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <!-- AngularJS important part -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.min.js"></script>
+    
+    <!-- Round progress -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-svg-round-progressbar/0.4.8/roundProgress.min.js"></script>
+
+    <!-- Autocomplete -->
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.0.4/angular-material.min.js"></script>
+    <!-- Icons Part -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+    <!-- Time Transfer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    
+
+    <title>Entertainment Event Ticket Search</title>
+    <style>
+      #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 80%;  /* The width is the width of the web page */
+      }
+      .progress-wrapper{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+
+      .progress-wrapper .text{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        text-align: center;
+        width: 100%;
+        height:100%;
+        z-index: 1;
+      }
+
+
+      .error_keyword{
+        border:solid 2px red;
+      }
+
+      .animation_hideR_F{
+        transition:all linear 0.5s;  
+        position: relative;
+        right: 0;
+        opacity: 1;
+      }
+      .animation_hideR_F.ng-hide {
+        right: -200px;
+        opacity:0;
+      }
+      .animate-hideDetail {
+        transition:all linear 0.5s;       
+        position: relative;
+        left: 0;  
+        opacity: 1;
+      }
+
+      .animate-hideDetail.ng-hide {        
+        left: -200px;
+        opacity: 0;
+      }
+      .showmore{
+        transition: all linear 0.2s;
+        height: 100px;
+      }
+      .showmore.ng-hide{
+        height: 0px;
+      }
+
+
+      
+
+      
+    </style>
+  </head>
+  <body ng-app = "myApp" ng-controller = "myController">
+    <div class="container">
+      <div class="card bg-light text-dark">
+        <div class="card-body">
+          <form id="mainForm" name="mainForm" novalidate>
+            <h4 class="card-title text-center">Entertainment Event Ticket Search</h4>
+
+            <div class="form-group row">
+              <div class="col-sm-2"></div>
+                <label for="keyword" class="col-sm-2 col-form-label">
+                <strong>Keyword<span class="text-danger">*</span></strong>
+                </label>
+              <div class="col-sm-6">
+                <md-autocomplete  placeholder="Enter Artist, Team or Event Name(eg.Lakers)" ng-style="(mainForm.keyword.$invalid && mainForm.keyword.$touched) ? {'border': 'red 2px solid'} : {}" ng-required = "requiredkeyword" name="keyword" md-no-cache="true" md-input-name="keyword" md-selected-item="selectedItem" md-search-text="searchText" md-items="auto_item in query(searchText)" md-item-text="auto_item">
+                  <md-item-template>
+                  <span md-highlight-text="searchText" >{{auto_item}}</span>
+                  </md-item-template>
+                </md-autocomplete>
+                <span style="color:red" ng-show="mainForm.keyword.$touched && mainForm.keyword.$invalid">
+                  Please enter a keyword.</span>  
+              </div>
+
+              <div class="col-sm-2"></div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-2"></div>
+              <label for="category" class="col-sm-2 col-form-label">
+              <strong>Category</strong>
+              </label>
+              <div class="col-sm-2">
+                <select  class="form-control" ng-model="category" id="category" name="category" ng-init="category='all'">
+                  <option value="all">All</option>
+                  <option value="music">Music</option>
+                  <option value="sports">Sports</option>
+                  <option value="artsthreatre">Arts & Theatre</option>
+                  <option value="film">Film</option>
+                  <option value="micellaneous">Micellaneous</option>
+                </select>
+              </div>
+              <div class="col-sm-8"></div>
+            </div>
+
+            <div class="form-group row">
+              <div class="col-sm-2"></div>
+              <label for="distance" class="col-sm-2 col-form-label">
+                <strong>Distance</strong>
+              </label>
+              <div class="col-sm-2">
+                <input type="text" class="form-control" ng-model="distance" id="distance" placeholder="10">
+              </div>
+              <div class="col-sm-2">
+                <select id="radius" class="form-control" name="radius">
+                  <option value="miles">Miles</option>
+                  <option value="km">Kilomiters</option>
+                </select>
+              </div>
+              <div class="col-sm-6"></div>
+            </div>
+
+            <fieldset class="form-group">
+              <div class="row">
+                <div class="col-sm-2"></div>
+                <legend class="col-form-label col-sm-2 pt-0">
+                  <strong>From<span class="text-danger">*</span></strong>
+                </legend>
+                <div class="col-sm-8">
+
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" ng-click="disableLoc()" name="gridRadios" id="gridRadios1" value="option1" checked>
+                    <label class="form-check-label" for="gridRadios1">
+                      Current location
+                    </label>
+                  </div>
+
+                  <div class="form-check" >
+                    <input class="form-check-input" type="radio" ng-click="enableLoc()" name="gridRadios" id="gridRadios2" value="option2">
+                    <label class="form-check-label" for="gridRadios2">
+                      Other. Please specify:
+                    </label>
+                    <input  type="text" class="form-control col-sm-10 " ng-model="location" id="location" name="location" ng-style="(mainForm.location.$invalid && mainForm.location.$touched && mainForm.location.$error.required)?{'border':'solid 2px red'}:{'border-color':''}" ng-disabled="ifdisableLoc" ng-required="!ifdisableLoc">
+
+                    <span style="color:red" ng-show="mainForm.location.$touched && mainForm.location.$invalid">
+                    <span ng-show="mainForm.location.$error.required">Please enter a location.</span>
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="form-group row">
+              <div class="col-sm-2"></div>
+              <div class="col-sm-10">
+                <button type="submit" class="btn btn-primary" ng-model="search" ng-click="search()" id="search"  name = "search" ng-disabled="mainForm.keyword.$invalid || mainForm.location.$invalid"><i class="material-icons" >search</i>Search</button>
+                <button type="reset" class="btn btn-outline-secondary text-dark" ng-click="clearAll()"><i class="material-icons">clear_all</i>Clear</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div> <!--end card for search table-->
+
+
+      <br>
+        <div style="margin: 0px auto;display: table;" >
+          <button type="button" class="btn btn-primary" id="results" ng-model="results" ng-click="displayResults()">Results</button>
+          <button type="button" class="btn btn-default text-primary" id="favors" ng-model="favors" ng-click="displayFavors()" style="text-decoration:none" >Favorites</button>
+        </div>
+      <br>
+
+    <div class="progress" style="margin-top: 20px" ng-show="showprogress">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"  style="width: 40%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <div class="alert alert-danger" role="alert" ng-show="erroralert">
+        Failed to get search results.
+    </div>
+
+    <!-- start results and favors -->
+    <div class="animation_hideR_F" ng-hide="!(showTable || showFavorTable || noFavors || noResults)">
+      <div class="alert alert-warning" role="alert" ng-show="noFavors" >
+        No Records
+      </div>
+
+      <div align="right">
+        <button type='button' class='btn btn-outline-secondary' ng-click="displayDetails()"  ng-show="showFavorTable || showTable" ng-disabled="checkdetails">Details<i class="material-icons">navigate_next</i></button>
+      </div>
+      <br>
+
+      <!--favorate table -->
+      <div ng-model="ftable" ng-show="showFavorTable" class="view-page" ng-if="showFavorTable">
+          <table class="table table-hover text-nowrap" id="favortable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Category</th>
+                  <th>Venue Info</th>
+                  <th>Favorite</th>                        
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="favoritem in favortables track by $index" id="favorrownum{{favoritem.eventid}}">
+                  <td><b>{{favoritem.favornum}}</b></td>
+                  <td>{{favoritem.date}}</td>
+                  <td data-toggle="tooltip" title="{{favoritem.event_name}}" ><a href="#" class="text-primary" style="text-decoration:none" ng-click="details(favoritem)">{{favoritem.cutted_event_name}}</a></td>
+                  <td>{{favoritem.category_genre}}-{{favoritem.category_segment}}</td>
+                  <td>{{favoritem.venue_info}}</td>
+                  <td><button type='button' id="favorbuttonnum{{favoritem.eventid}}" class="btn btn-outline-secondary btn-sm" ng-click="delefavor(favoritem.eventid)"><i class="material-icons" id='{{favoritem.eventid}}'>delete</i></button></td>
+                </tr>
+              </tbody>
+          </table>
+      </div>
+
+      <!--results table -->
+      <div class="alert alert-warning" role="alert" ng-show="noResults" >
+        No Records
+      </div>
+
+      <div ng-model="table" ng-show="showTable && showFavorited(tables)" class="view-page">
+          <table class="table table-hover text-nowrap" id="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Category</th>
+                  <th>Venue Info</th>
+                  <th>Favorite</th>                        
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="item in tables" id="rownum{{item.eventid}}">
+                  <td><b>{{item.num}}</b></td>
+                  <td>{{item.date}}</td>
+                  <td data-toggle="tooltip" title="{{item.event_name}}" ><a href="#" class="text-primary"  style="text-decoration:none" ng-click="details(item)">{{item.cutted_event_name}}</a></td>
+                  <td>{{item.category_genre}}-{{item.category_segment}}</td>
+                  <td>{{item.venue_info}}</td>
+                  <td><button type='button' id="buttonnum{{item.eventid}}" class="btn btn-outline-secondary btn-sm" ng-click="clickFavor(item.eventid, item.eventid, item)"><i id='{{item.eventid}}' class="material-icons">star_border</i></button></td>
+                </tr>
+              </tbody>
+          </table>
+      </div>
+
+    </div><!-- end results and favors-->
+
+    <!--detail 4 columns -->
+    <div ng-model="detailfour" ng-show="showDetail && validStar(detailjson.eventid)" class = "animate-hideDetail" ng-hide="!(showDetail && validStar(detailjson.eventid))">
+        <div ng-model="detailname" ng-bind-html="wname" style="text-align: center; font-size: 1.4em"></div>
+
+        <div>
+            <div align="left">
+              <button type='button' class='btn btn-outline-secondary text-dark' value='List' ng-click="clickList()"><i class="material-icons">keyboard_arrow_left</i> List</button>
+            </div>
+
+            <div align="right">
+              <a ng-click="Twitter()"><img src="http://csci571.com/hw/hw8/Images/Twitter.png" width="38px" height="38px" style="margin-right:1%;"></a>
+              <button type='button' class="btn btn-outline-secondary btn-sm" ng-click="clickFavor(detailjson.eventid, 'detailstar', detailjson)"><i id="detailstar" class="material-icons">star_border</i></button>             
+            </div>
+        </div>
+        <br>
+        
+
+        <!--导航栏 -->
+        <div>
+        <ul class="nav nav-tabs justify-content-end">
+          <li class="nav-item"><a id="infotab" class="nav-link active" href="#info" data-toggle="tab" ng-click="hideMap()">Event</a></li>
+          <li class="nav-item"><a id="phototab" class="nav-link" href="#photosid" data-toggle="tab" ng-click="hideMap()"><div class="row">Artist<p class="d-none d-sm-block">/Teams</p></div></a></li>
+          <li class="nav-item"><a id="venuetab" class="nav-link" href="#venue" data-toggle="tab" ng-click="initMap()">Venue</a></li>
+          <li class="nav-item"><a id="upeventstab" class="nav-link" href="#upevents" data-toggle="tab" ng-click="hideMap()"><div class="row">Upcoming <p class="d-none d-sm-block">Events</p></div></a></li>   
+        </ul>
+        </div>
+
+        <!--导航栏内容 -->  
+        <div class="tab-content">
+
+          <!--1 Event-->  
+          <div id="info" ng-model="detailTable" ng-bind-html="wdetails" class="tab-pane active">
+          </div>
+
+          <!--2 Aritst&Teams -->   
+          <div id="photosid" ng-model="detailPhotos" ng-bind-html="wartistAndTeams_info" class="tab-pane">
+          </div> 
+
+          <div style="margin-top: 70px" class="alert alert-warning" role="alert" ng-show="photoNorecords">
+                  No Records
+          </div>
+          <div class="alert alert-danger" role="alert" ng-show="erroralert_artists">
+            Failed to get search results.
+          </div>
+
+          <!--3 Venue-->  
+          <div id="venue" ng-model="detailVenue" ng-bind-html="wvenue" class="tab-pane"></div>
+          <div style='margin: 0 auto;' id='map'></div>
+
+          <!--4 UpcomingEvents -->  
+          <div id='upevents' ng-model="detailUpevents" class="tab-pane" >
+            <br>
+            <div ng-show="upevents_show">
+
+            <div class="row" >
+              <!--两个选择按钮-->
+              <div class="col-sm-3" style="float: left"> 
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary text-dark dropdown-toggle btn-block" style="text-align: left" type="button" id="category_list" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{Category_drop}}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" ng-click="DefaultOrder()">Default</a>
+                  <a class="dropdown-item" ng-click="EventOrder()">Event Name</a>
+                    <a class="dropdown-item" ng-click="TimeOrder()">Time</a>
+                    <a class="dropdown-item" ng-click="ArtistOrder()">Artist</a>
+                    <a class="dropdown-item" ng-click="TypeOrder()">Type</a>
+                </div>
+              </div>
+              </div>
+
+              <div class="col-sm-3" style="float: left">
+              <div class="dropdown">
+                <button class="btn btn-outline-secondary text-dark dropdown-toggle btn-block" style="text-align: left" type="button" id="order" ng-disabled="a_d_disable" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-left:6%;">
+                  {{Order_drop}}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" >
+                  <a class="dropdown-item" ng-click="Ascending()">Ascending</a>
+                  <a class="dropdown-item" ng-click="Descending()">Descending</a>
+                </div>
+              </div>
+              </div>
+            </div><!-- end row -->
+
+            
+
+            <div class="progress" style="margin-top: 20px" ng-show="upeventsprogress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+              </div>
+            </div>
+
+            <div id="upeventsTable" ng-show="upcomingevents_show">
+
+              <!-- First five upcomingevents -->
+              <div ng-repeat="event in wupevents_tables | orderBy: order : descending | limitTo: 5 ">
+                <div class="card" style="margin: 4px">
+                <table>
+                    <tr>
+                      <td>
+                          <a href='{{event.display_name_url}}' target='_blank' style="text-decoration:none; font-weight: bold" >{{event.display_name}}</a>
+                          <br>
+                          <span style="color: orange; font-weight: bold">Artist: {{event.upevent_artist}}  </span><span style="color: darkgrey">{{event.upevent_date}} {{event.upevent_time}}</span>
+                          <br>
+                          Type: {{event.upevent_type}}
+                          <br>
+                          <br>
+                      </td>
+                    </tr>
+                </table>
+                </div>
+              </div>
+
+              <!-- Other upcomingevents -->
+              <div class="showmore" ng-repeat="event in wupevents_tables | orderBy: order : descending | limitTo: numLimit :5 " ng-hide="hidemore" ng-show="showmore_part">
+                <div class="card " style="margin: 4px">
+                <table>
+                    <tr>
+                      <td >
+                          <a href='{{event.display_name_url}}' target='_blank' style="text-decoration:none; font-weight: bold" >{{event.display_name}}</a>
+                          <br>
+                          <span style="color: orange; font-weight: bold">Artist: {{event.upevent_artist}}  </span><span style="color: darkgrey">{{event.upevent_date}} {{event.upevent_time}}</span>
+                          <br>
+                          Type: {{event.upevent_type}}
+                          <br>
+                          <br>
+                      </td>
+                    </tr>
+                </table>
+                </div>
+              </div> 
+
+            </div><!-- end upeventstables -->
+
+            <div style="margin: 40px auto; display: table;" >
+            <button type="button" class="btn btn-primary" id="showMorL"  ng-model="showMorL" ng-click="showMorL()">Show More</button>
+            </div>
+          </div><!-- end upcoming_events all content -->
+
+
+          <div style="margin-top: 50px" class="alert alert-warning" role="alert" ng-show="upeventNorecords">
+            No Records
+          </div>
+          <div class="alert alert-danger" role="alert" ng-show="erroralert_upevents">
+            Failed to get search results.
+          </div>
+
+          </div> <!-- end upevents -->
+           
+
+      </div> <!-- end tabs content-->
+    </div> <!-- end details -->
+  </div><!-- end container -->
+
+
+</body> 
+    <script type="text/javascript">
+
+      //原来的定位方法
+      function loadJsonToLocateHere(url) {
+        if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();   
+        }
+        else {// code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");  
+        }
+
+        xmlhttp.onreadystatechange=function(){
+
+        if (xmlhttp.readyState==4 ){
+            if(xmlhttp.status==200){
+              jsonDoc = xmlhttp.responseText;
+            }
+            else{
+              window.alert("Fetch the user's geolocation unsuccessfully!");
+            }
+          }
+        };
+        xmlhttp.open("GET",url,false);//'synchronous'
+        xmlhttp.send();
+        return jsonDoc;  
+      }
+
+      function locateHere(){
+        var url = "http://ip-api.com/json";
+        jsonDoc = loadJsonToLocateHere(url);
+        var jsonObject = JSON.parse(jsonDoc);
+        curLat = jsonObject.lat;
+        curLon = jsonObject.lon;
+        
+        document.getElementById("search").disabled = false;
+      }
+      window.onload = locateHere();
+
+      $(document).ready(function(){
+        $('[data-toggle="tooltip"]').tooltip();   
+      });
+
+    </script>
+    <script>
+
+      var app = angular.module('myApp', ['ngAnimate','angular-svg-round-progressbar','ngMaterial']);
+      app.controller('myController', function($scope, $http, $sce, $q) {
+            $scope.favorStorage = window.localStorage;// initialize storage
+            //alert("controller success");
+            $scope.requiredkeyword = true;
+
+            $scope.erroralert = false;//red error alert
+            $scope.erroralert_artists = false;
+            $scope.erroralert_upevents = false;
+            $scope.checkdetails = true;//btn-detail disabled
+            $scope.ifdisableLoc = true;//loc-input disabled
+            $scope.checkresults = true;//check results-table's showing
+            $scope.showprogress = false;
+
+            $scope.showFavorTable = false;
+            $scope.showTable = false;
+            $scope.showDetail = false;
+            $scope.tables = [];
+            $scope.favortables = [];
+
+            $scope.noResults = false;
+            $scope.noFavors = false;
+            $scope.resultnorecord = true; //后面用
+
+            $scope.setLoc = "";
+
+            $scope.Category_drop = "Default";
+            $scope.Order_drop = "Ascending";
+            $scope.descending = false;
+            $scope.upcomingevents_show = false;
+            $scope.upeventsprogress = false;
+
+            $scope.photoNorecords = false;
+            $scope.upeventNorecords = false;
+            $scope.showmore_part = false;
+            $scope.hidemore = true;
+
+
+            $scope.query = function(searchText) {
+              var nsearchText = searchText.replace(/ /g,"+");
+              return $http({
+                  method: 'GET',
+                  // url: 'http://localhost:8081/Autocomplete',
+                  url: 'http://siqi-cs571h8-nodejs.us-east-2.elasticbeanstalk.com/Autocomplete',
+                  params: {"auto_keyword": nsearchText}
+                  }).then(function successCallback(response) {
+                    var autonames_table = [];
+                    var autonames = response.data._embedded.attractions;
+
+                    for(i = 0; i < autonames.length; i++){
+                      if(autonames[i].name!= undefined){
+                        autonames_table.push(autonames[i].name);
+                      } 
+                    }
+                    return autonames_table;
+                  }, function myError(response) {    
+                  });
+              }
+
+            
+             $scope.enableLoc = function() {
+                $scope.ifdisableLoc = false;
+             };
+
+             $scope.disableLoc = function() {
+                $scope.ifdisableLoc = true;
+             };
+
+             $scope.DefaultOrder = function(){
+              $scope.a_d_disable = true;
+              $scope.order = "";
+              $scope.Category_drop = "Default";
+             }
+
+             $scope.EventOrder = function(){
+              $scope.a_d_disable = false;
+              $scope.order = "display_name";
+              $scope.Category_drop = "Event Name";
+             }
+
+             $scope.TimeOrder = function(){
+              $scope.a_d_disable = false;
+              $scope.order = "format_date";
+              $scope.Category_drop = "Time";
+             }
+
+             $scope.ArtistOrder = function(){
+              $scope.a_d_disable = false;
+              $scope.order = "upevent_artist";
+              $scope.Category_drop = "Artist";
+             }
+
+             $scope.TypeOrder = function(){
+              $scope.a_d_disable = false;
+              $scope.order = "upevent_type";
+              $scope.Category_drop = "Type";
+             }
+
+             $scope.Ascending = function(){
+              $scope.descending = false;
+              $scope.Order_drop = "Ascending";
+             }
+
+             $scope.Descending = function(){
+              $scope.descending = true;
+              $scope.Order_drop = "Dscending";
+             }
+
+
+             $scope.showMorL = function(){
+              if($("#showMorL").text() == "Show More"){
+                $("#showMorL").text("Show Less");
+                $scope.showmore_part = true;
+                $scope.hidemore = false;
+                $scope.numLimit = $scope.wupevents_tables.length;
+              }
+              else{
+                $("#showMorL").text("Show More");
+                $scope.showmore_part = false;
+                $scope.hidemore = true;
+              }
+             };
+
+             $scope.clearAll = function(){
+                $scope.showprogress = false;
+                $scope.showTable = false;
+                $scope.showFavorTable = false;
+                $scope.showDetail = false;
+                $scope.noResults = false;
+                $scope.noFavors = false;
+                $scope.erroralert = false;
+                $scope.erroralert_artists = false;
+                $scope.erroralert_upevents = false;
+                $scope.ifdisableLoc = true;
+                $('#results').attr('class', "btn btn-primary");
+                $('#favors').attr('class', "btn btn-link");
+                $('#category').attr('value', "default");
+                //$scope.mainForm.location.$invalid = false;
+                //$('#search').attr('ng-disabled', "true");
+                document.getElementById("search").disabled = true;
+                $('#gridRadios1').attr('checked', "checked");
+                $scope.requiredkeyword = true;
+                $scope.mainForm.keyword.$touched = false;
+                $scope.mainForm.keyword.$invalid = true;
+
+            };
+
+            $scope.clickList = function(){
+                if($scope.checkresults == true){ 
+                    $scope.showDetail_a = true;
+                    $scope.showDetail = false;
+                    $scope.showTable = true;
+                    $scope.showFavorTable = false;
+                    
+                }
+                else{
+                    $scope.showDetail_a = true;
+                    $scope.showDetail = false;
+                    $scope.showFavorTable = true;
+                    $scope.showTable = false;
+                    
+                }
+            }
+
+            $scope.displayDetails = function(){
+                $scope.showTable = false;
+                $scope.showFavorTable = false;
+                $scope.showDetail = true;
+                $("#rownum" + $scope.detail_eventid).css('background-color',"#f9dd9b");
+                if($scope.favorStorage.getItem($scope.detail_eventid)){
+                  $("#favorrownum" + $scope.detail_eventid).css('background-color',"#f9dd9b");
+                }
+            }
+
+            $scope.clickFavor = function(favorid1, favorid2, itemJsonObj){
+                if($scope.favorStorage.getItem(favorid1)){                   
+                    $("#" + favorid1).css('color','');
+                    $("#" + favorid1).text("star_border");                 
+                    $("#" + favorid2).css('color','');
+                    $("#" + favorid2).text("star_border");
+                    $scope.favorStorage.removeItem(favorid1);           
+                }
+                else{ 
+                    itemJsonStr = JSON.stringify(itemJsonObj);
+                    $scope.favorStorage.setItem(favorid1, itemJsonStr);                     
+                    $("#" + favorid1).css('color','#f1ce53');
+                    $("#" + favorid1).text("star");
+                    $("#" + favorid2).css('color','#f1ce53');
+                    $("#" + favorid2).text("star");
+                }
+                
+            }
+
+
+             $scope.search = function(){
+                 $scope.showprogress = true;
+                 $scope.showFavorTable = false;
+                 $scope.showTable = false; 
+                 $scope.checkresults = true;
+                 $scope.noResults = false;
+                 $scope.noFavors = false;
+                 $('#results').attr('class', "btn btn-primary");
+                 $('#favors').attr('class', "btn btn-link");
+                 
+                 $scope.showDetail = false;
+                 $scope.showDetail_a = true;
+                 var nkey = $scope.searchText.replace(/ /g,"+");
+                  var choice = "";
+                  if (document.getElementById("location").disabled == true) {
+                      choice = "here";
+                  } else {
+                      choice = "userInput";
+                  }
+
+                 var sendInfo = {
+                    "keyword": nkey,
+                    "category": $("#category").val(),
+                    "distance": $("#distance").val(),
+                    "curLat": curLat,
+                    "curLon": curLon,
+                    "location": $("#location").val(),
+                    "choice": choice,
+                    "d_choice": $("#radius").val()
+                  };
+
+                 $http({
+                     method: 'GET',
+                     // url: 'http://localhost:8081/formData',
+                     url: 'http://siqi-cs571h8-nodejs.us-east-2.elasticbeanstalk.com/formData',
+                     params: sendInfo,
+                     }).then(function mySuccess(response) {
+
+                      $scope.showprogress = false;
+                      $scope.showTable = true;
+
+                        if(response.data.page.totalElements == 0){
+                            $scope.erroralert = false;
+                            $scope.erroralert_artists = false;
+                            $scope.erroralert_upevents = false;
+                            $scope.noResults = true;
+                            $scope.resultnorecord = true;
+                            $scope.showTable = false;
+                            return;
+                        }
+                        else{
+                            $scope.erroralert = false;
+                            $scope.erroralert_artists = false;
+                            $scope.erroralert_upevents = false;
+                            $scope.noResults = false;
+                            $scope.resultnorecord = false;
+                         }
+                        
+                        $scope.tables = [];
+                        jsonResults = response.data._embedded.events;
+
+                        for(i = 0; i < jsonResults.length; i++){
+                            var data = new Object();
+
+                            if(jsonResults[i]._embedded.attractions != undefined){
+                              artist_teams_array =[];
+                              for(j = 0; j < jsonResults[i]._embedded.attractions.length; j++){
+                                artist_teams_array.push(jsonResults[i]._embedded.attractions[j].name);
+                              }
+                                data.artist_teams = artist_teams_array;
+                            }
+
+                            if(jsonResults[i].dates.start.localDate!= undefined){
+                              data.date = jsonResults[i].dates.start.localDate;
+                            }
+                            if(jsonResults[i].dates.start.localTime!= undefined){
+                              data.time = jsonResults[i].dates.start.localTime;
+                            }
+                            if(jsonResults[i].name!= undefined){
+                              data.event_name = jsonResults[i].name;
+                            }
+                            if(jsonResults[i].classifications[0].genre!= undefined){
+                              data.category_genre = jsonResults[i].classifications[0].genre.name;
+                            }
+                            else{
+                              data.category_genre = "N/A";
+                            }
+
+                            if(jsonResults[i].classifications[0].segment!= undefined){
+                              data.category_segment = jsonResults[i].classifications[0].segment.name;
+                            }
+                            else{
+                              data.category_segment = "N/A";
+                            }
+
+                            if(jsonResults[i]._embedded.venues[0]!= undefined){
+                              data.venue_info = jsonResults[i]._embedded.venues[0].name;
+                            }
+                            else{
+                              data.venue_info = "N/A";
+                            }
+
+                            if(jsonResults[i].priceRanges!= undefined){
+                              data.price_min = jsonResults[i].priceRanges[0].min;
+                              data.price_max =jsonResults[i].priceRanges[0].max;
+                            }
+                            if(jsonResults[i].dates.status!= undefined){
+                              data.ticket_status = jsonResults[i].dates.status.code;
+                            }
+                            if(jsonResults[i].url!= undefined){
+                              data.buy_ticket = jsonResults[i].url;
+                            }
+                            if(jsonResults[i].seatmap!= undefined){
+                              data.seatmap = jsonResults[i].seatmap.staticUrl;
+                            }
+                            if(jsonResults[i]['id']!= undefined){
+                              data.eventid = jsonResults[i]['id'];
+                            }
+                            if(jsonResults[i]._embedded.venues[0].address!= undefined){
+                              data.v_addr = jsonResults[i]._embedded.venues[0].address.line1;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].city!= undefined){
+                              data.v_city = jsonResults[i]._embedded.venues[0].city.name;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].state!= undefined){
+                              data.v_state = jsonResults[i]._embedded.venues[0].state.name;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].boxOfficeInfo!= undefined){
+                              data.phone_num = jsonResults[i]._embedded.venues[0].boxOfficeInfo.phoneNumberDetail;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].boxOfficeInfo!= undefined){
+                              data.open_hour = jsonResults[i]._embedded.venues[0].boxOfficeInfo.openHoursDetail;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].generalInfo!= undefined){
+                              data.g_rule = jsonResults[i]._embedded.venues[0].generalInfo.generalRule;
+                            }
+                            if(jsonResults[i]._embedded.venues[0].generalInfo!= undefined){
+                              data.c_rule = jsonResults[i]._embedded.venues[0].generalInfo.childRule;
+                            }
+                            if(jsonResults[i].outlets!= undefined){
+                              data.event_url = jsonResults[i].outlets[0].url;
+                            }
+                            $scope.tables.push(data);
+                            
+                        }
+                        
+                        $scope.tables.sort(function(a,b){return b['date'] < a['date'] ? 1 : -1 });
+                        
+                        for(i = 0; i < $scope.tables.length; i++){
+                          $scope.tables[i]['num'] = i+1;
+                          cutnum = 30;
+                          if($scope.tables[i]['event_name'].length >= cutnum){
+                            while($scope.tables[i]['event_name'].charAt(cutnum)!=" "){
+                              cutnum--;
+                            }
+                            $scope.tables[i]['cutted_event_name'] = $scope.tables[i]['event_name'].substring(0,cutnum+1) + "...";
+                          }
+                          else{
+                            $scope.tables[i]['cutted_event_name'] = $scope.tables[i]['event_name'];
+                          }
+                          
+                        }
+
+                  }, function myError(response) {
+                     
+                  $scope.erroralert = true;
+                            $scope.showprogress = false;
+                            $scope.noResults = false;
+                            $scope.noFavors = false;
+                          });
+                             
+                             
+                                                                     
+          };
+
+          $scope.displayResults = function(){
+                if($scope.resultnorecord == true){
+                    $scope.showTable = false;                    
+                    $scope.noResults = true;
+                }
+                else{
+                    $scope.showTable = true;                    
+                    $scope.noResults = false;
+                }
+                $scope.noFavors = false;
+                $scope.showFavorTable = false;
+                $scope.checkresults = true;
+                $('#results').attr('class', "btn btn-primary");
+                $('#favors').attr('class', "btn btn-default text-primary");
+
+          }
+
+          $scope.showFavorited = function(tablejson){
+              for(q = 0; q < tablejson.length; q++){
+                  if($scope.favorStorage.getItem(tablejson[q].eventid)){
+                      $("#" + tablejson[q].eventid).css('color','#f1ce53');
+                      $("#" + tablejson[q].eventid).text("star");                  
+                  }
+                  else{
+                      $("#" + tablejson[q].eventid).css('color','');
+                      $("#" + tablejson[q].eventid).text("star_border"); 
+                  }
+                  
+              }
+              return true;
+          }
+
+            $scope.displayFavors = function(){             
+                $scope.checkresults = false;
+                $scope.showTable = false;
+                $scope.showFavorTable = true; 
+                $scope.noResults = false; 
+                $scope.showDetail = false;
+                $('#results').attr('class', "btn btn-default text-primary");
+                $('#favors').attr('class', "btn btn-primary");
+                $scope.favortables = [];
+                var j = 1;
+                if($scope.favorStorage.length == 0){
+                    $scope.noFavors = true;
+                    $scope.showFavorTable = false; 
+                   
+                }
+                else{
+                    $scope.noFavors = false;
+                    $scope.showFavorTable = true;
+                    
+                }
+                for(i = 0; i < $scope.favorStorage.length; i++){
+                    var favorkey = $scope.favorStorage.key(i);
+                    var favorvalue = $scope.favorStorage.getItem(favorkey);
+                    var favorJsonObj = JSON.parse(favorvalue);
+                    favorJsonObj.favornum = j;
+                    var s = JSON.stringify(favorJsonObj);
+                    $scope.favortables.push(favorJsonObj);
+                    j++;
+                }            
+                
+            }
+
+            $scope.delefavor = function(favor_id){
+                $scope.favorStorage.removeItem(favor_id);
+                $scope.displayFavors();
+            }
+
+            $scope.validStar = function(itemid){
+                if($scope.favorStorage.hasOwnProperty(itemid)){
+                    $('#detailstar').css('color','#f1ce53');
+                    $('#detailstar').text("star"); 
+                }
+                else{
+                    
+                    $('#detailstar').css('color','');
+                    $('#detailstar').text("star_border");  
+                }
+                return true;
+            }
+
+            $scope.Twitter = function () {
+                var urlTW = "https://twitter.com/intent/tweet?text=";
+                urlTW += "Check out " + $scope.detailjson.event_name + " at " + $scope.detailjson.venue_info + ".";
+                urlTW += " Website: " + $scope.detailjson.buy_ticket;
+                urlTW += "&hashtags=CSCI571EventSearch";
+
+                window.open(urlTW,"twitter","width=600px,height=400px");
+            }
+
+            $scope.initMap = function(){
+              var nloc = $scope.setLoc.replace(/ /g,"+");
+              $("#map").show();
+              $http({
+                  method: 'GET',
+                  url: 'https://maps.googleapis.com/maps/api/geocode/json?address='+nloc+'&key=AIzaSyBvjkpUHS76A7gKVMZY0ixaCT2QrWDBfug'
+                  }).then(function successCallback(response) {
+
+                    loc_lat = response.data.results[0].geometry.location.lat;
+                    loc_lon = response.data.results[0].geometry.location.lng;
+
+                    var uluru = {lat: loc_lat, lng: loc_lon};
+                    // The map, centered at Uluru
+                    var map = new google.maps.Map(
+                        document.getElementById('map'), {zoom: 17, center: uluru});
+                    // The marker, positioned at Uluru
+                    var marker = new google.maps.Marker({position: uluru, map: map});
+
+                  }, function errorCallback(response) {
+                     }).catch(e => {
+                            //alert(e);
+                            //$scope.erroralert = true;
+                  });
+              
+            }
+
+            $scope.hideMap = function(){
+              $("#map").hide();
+            }
+
+
+
+            $scope.details = function(event_json){
+                $("#info").attr('class','tab-pane active');
+                $("#venue").attr('class','tab-pane');
+                $("#photosid").attr('class','tab-pane');
+                $("#upevents").attr('class','tab-pane');
+
+                $("#infotab").attr('class','nav-link active');
+                $("#venuetab").attr('class','nav-link');
+                $("#phototab").attr('class','nav-link');
+                $("#upeventstab").attr('class','nav-link');
+
+                $("#rownum" + $scope.detail_eventid).css('background-color',"");
+                $("#favorrownum" + $scope.detail_eventid).css('background-color',"");
+                $scope.Category_drop = "Default";
+                $scope.Order_drop = "Ascending";
+
+                $scope.detailjson = event_json;
+
+                $scope.showTable = false;
+                $scope.showFavorTable = false;
+              
+                $scope.showDetail = true;
+                $scope.showDetail_a = false;
+
+                $scope.wupevents_tables = [];
+                $scope.upcomingevents_show = true;
+                $scope.upevents_show = true;
+                $scope.checkdetails = false;
+                $scope.photoNorecords = false;
+                $scope.upeventNorecords = false;
+                $scope.a_d_disable = true;
+
+                $scope.detail_eventid = event_json.eventid;
+                $("#rownum" + $scope.detail_eventid).css('background-color',"#f9dd9b");
+                if($scope.favorStorage.getItem($scope.detail_eventid)){
+                  $("#favorrownum" + $scope.detail_eventid).css('background-color',"#f9dd9b");
+                }
+                $scope.setLoc = event_json.venue_info;
+                
+                
+                    $scope.wname = "<b>"+ event_json.event_name +"</b>";
+                    $scope.wname = $sce.trustAsHtml($scope.wname);
+
+                    //1 Detail-info Tab
+                    $scope.wdetails = "<table class='table table-striped text-nowrap'>";
+
+                    var a_t_array_photo = [];
+                    if(event_json.artist_teams){
+                      $scope.wdetails += "<tr><th><b>Artist/Team(s)</b></th><td>";
+                      for(i = 0; i < event_json.artist_teams.length - 1; i++){
+                        $scope.wdetails += event_json.artist_teams[i] +" | ";
+                        a_t_array_photo.push(event_json.artist_teams[i]);
+
+                      }
+                        $scope.wdetails += event_json.artist_teams[event_json.artist_teams.length - 1] + "</td></tr>";
+                        a_t_array_photo.push(event_json.artist_teams[event_json.artist_teams.length - 1]);
+
+                    }
+                    if(event_json.venue_info){
+                      $scope.wdetails += "<tr><th><b>Venue</b></th>";
+                      $scope.wdetails += "<td>" + event_json.venue_info +"</td></tr> ";
+                    }
+
+                    if(event_json.date){
+                      $scope.wdetails += "<tr><th><b>Time</b></th>";
+                      $scope.wdetails += "<td>" + moment(event_json.date).format('ll');
+                      if(event_json.time) {
+                        $scope.wdetails += " "+ event_json.time + "</td></tr> ";
+                      }
+                      else{
+                        $scope.wdetails += "</td></tr> ";
+                      }
+                    }
+
+                    if(event_json.category_genre){
+                      $scope.wdetails += "<tr><th><b>Category</b></th>";
+                      $scope.wdetails += "<td>" + event_json.category_segment;
+                      if(event_json.category_segment){
+                        $scope.wdetails += " | " + event_json.category_genre + "</td></tr> ";
+                      } 
+                      else{
+                        $scope.wdetails += "</td></tr> ";
+                      }
+                    }
+
+                    if(event_json.price_min && event_json.price_max){
+                      $scope.wdetails += "<tr><th><b>Price Range</b></th>";
+                      $scope.wdetails += "<td>$" + event_json.price_min.toFixed(2) + " ～ $" + event_json.price_max.toFixed(2) + "</td></tr> ";
+                    }
+
+                    else if(event_json.price_min){
+                      $scope.wdetails += "<tr><th><b>Price Range</b></th>";
+                      $scope.wdetails += "<td>$" + event_json.price_min.toFixed(2) + "</td></tr> ";
+                    }
+
+                    else if(event_json.price_max){
+                      $scope.wdetails += "<tr><th><b>Price Range</b></th>";
+                      $scope.wdetails += "<td>$" + event_json.price_max.toFixed(2) + "</td></tr> ";
+                    }
+
+                    if(event_json.ticket_status){
+                      $scope.wdetails += "<tr><th><b>Ticket Status</b></th>";
+                      $scope.wdetails += "<td>" + event_json.ticket_status + "</td></tr> ";
+                    }
+
+                    if(event_json.buy_ticket){
+                      
+                      $scope.wdetails += "<tr><th><b>Buy Ticket At</b></th>";
+                      $scope.wdetails += "<td><a style=\'color:rgb(21,127,251); text-decoration:none\' target=\"_blank\" href =" + event_json.buy_ticket + ">Ticketmaster</a></td></tr>";
+                    }
+
+                    if(event_json.seatmap){
+                      
+                      $scope.wdetails += "<tr><th><b>Seat Map</b></th>";
+                      $scope.wdetails += "<td><a style=\'color:rgb(21,127,251); text-decoration:none\' data-toggle='modal' data-target='#myModal'>View Seat Map Here</a></td></tr>";
+                      $scope.wdetails += "<div class='modal fade' id='myModal'><div class='modal-dialog'><div class='modal-content'>";
+                      $scope.wdetails += "<div class='modal-header'><h4 class='modal-title'>View Seat Map</h4><button type='button' class='close' data-dismiss='modal'>&times;</button></div>";
+                      $scope.wdetails += "<div class='modal-body'><a target=\"_blank\" href =" + event_json.seatmap + "><img src=\'"+ event_json.seatmap + "\' width=\"100%\" ></a></div>";
+                      $scope.wdetails += "<div class='modal-footer'><button type='button' class='btn btn-secondary' data-dismiss='modal'>close</button></div></div></div></div>";
+                    }
+                    $scope.wdetails += "</table>";
+                    $scope.wdetails = $sce.trustAsHtml($scope.wdetails);
+                    
+
+                    //2 Detail-Artist&Teams Tab
+                    $scope.wartistAndTeams_info = "";
+                    if(!event_json.artist_teams){
+                      $scope.wartistAndTeams_info = "<div style=\"margin-top: 50px\" class=\"alert alert-warning\" role=\"alert\">No Records</div>"
+                      $scope.wartistAndTeams_info = $sce.trustAsHtml($scope.wartistAndTeams_info);
+                    }
+
+                    $scope.upeventsprogress = true;
+                    if(event_json.artist_teams){
+                      for(j = 0; j < event_json.artist_teams.length; j++){
+                        artist_teams_name = event_json.artist_teams[j];
+                        
+                        $http({
+                          method: 'GET',
+                          // url: 'http://localhost:8081/ArtistTeamPhotos',
+                          url: 'http://siqi-cs571h8-nodejs.us-east-2.elasticbeanstalk.com/ArtistTeamPhotos',
+                          params: {"art_teams": artist_teams_name}
+                          }).then(function mySuccess(response) {
+                            $scope.upeventsprogress = false;
+
+                          if(event_json.category_segment == "Music"){
+                            $http({
+                            method: 'GET',
+                            // url: 'http://localhost:8081/Music_ArtistTeam',
+                            url: 'http://siqi-cs571h8-nodejs.us-east-2.elasticbeanstalk.com/Music_ArtistTeam',
+                            params: {"art_teams": response.data.queries.request[0].searchTerms}
+                            }).then(function successCallback(response1) {
+
+                              $scope.wartistAndTeams_info += "<br><b><h1 style=\"text-align: center; font-size: 1.4em\">"+ response.data.queries.request[0].searchTerms +"</h1></b><br>";
+                              $scope.wartistAndTeams_info += "<div><table class='table table-striped text-nowrap'>";
+                              
+                              if(response1.data.body.artists.items[0].name){
+                                $scope.wartistAndTeams_info += "<tr><th><b>Name</b></th>";
+                                $scope.wartistAndTeams_info += "<td>" + response1.data.body.artists.items[0].name +"</td></tr> ";
+                              }
+
+                              if(response1.data.body.artists.items[0].followers){
+                                $scope.wartistAndTeams_info += "<tr><th><b>Followers</b></th>";
+                                $scope.wartistAndTeams_info += "<td>" + parseInt(response1.data.body.artists.items[0].followers.total).toLocaleString()+"</td></tr> ";
+                              }
+                              if(response1.data.body.artists.items[0].popularity){
+                                $scope.wartistAndTeams_info += "<tr><th><b>Popularity</b></th>";
+                                $scope.wartistAndTeams_info += "<td><round-progress [current]=\'" + response1.data.body.artists.items[0].popularity + "\' [max]=\'100\' [color]=\"#7fb53e\" >" + response1.data.body.artists.items[0].popularity +"</round-progress></td></tr> ";
+                              }
+                              if(response1.data.body.artists.items[0].external_urls.spotify){
+                                $scope.wartistAndTeams_info += "<tr><th><b>Check At</b></th>";
+                                $scope.wartistAndTeams_info += "<td><a style=\'color:rgb(21,127,251); text-decoration:none\' target=\"_blank\" href =" + response1.data.body.artists.items[0].external_urls.spotify + ">Spotify</a>" +"</td></tr></table></div> ";
+                              }
+
+
+                              $scope.wartistAndTeams_info +="<div class=\"container\">";
+                              for(a = 0; a < response.data.items.length; a++){
+                                //alert(response.data.items[a]);
+                                $scope.wartistAndTeams_info +="<div class=\"row\"><div class=\"col-md-4\">";
+                                $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                                $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div>";
+                                a++;
+                                if(a == response.data.items.length){
+                                  break;
+                                }
+                                $scope.wartistAndTeams_info +="<div class=\"col-md-4\">";
+                                $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                                $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div>";
+                                a++;
+                                if(a == response.data.items.length){
+                                  break;
+                                }
+                                $scope.wartistAndTeams_info +="<div class=\"col-md-4\">";
+                                $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                                $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div></div><br>";
+                              }
+                              $scope.wartistAndTeams_info +="</div>";
+                              $scope.wartistAndTeams_info = $sce.trustAsHtml($scope.wartistAndTeams_info);
+                                    
+                                }, function errorCallback(response) {
+                                   $scope.erroralert_artists = true;
+                            });
+
+
+                          }//end Music segment
+
+                          else{
+                            $scope.wartistAndTeams_info += "<br><b><h1 style=\"text-align: center; font-size: 1.4em\">"+ response.data.queries.request[0].searchTerms +"</h1></b><br>";
+                            $scope.wartistAndTeams_info +="<div class=\"container\">";
+                            for(a = 0; a < response.data.items.length; a++){
+                              //alert(response.data.items[a]);
+                              $scope.wartistAndTeams_info +="<div class=\"row\"><div class=\"col-md-4\">";
+                              $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                              $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div>";
+                              a++;
+                              if(a == response.data.items.length){
+                                break;
+                              }
+                              $scope.wartistAndTeams_info +="<div class=\"col-md-4\">";
+                              $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                              $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div>";
+                              a++;
+                              if(a == response.data.items.length){
+                                break;
+                              }
+                              $scope.wartistAndTeams_info +="<div class=\"col-md-4\">";
+                              $scope.wartistAndTeams_info += "<a href=\'" +response.data.items[a].link+ "\'target=\'_blank\'>";
+                              $scope.wartistAndTeams_info += "<img src=\'"+ response.data.items[a].link + "\' width=\"250px\"></a></div></div><br>";
+                            }
+                            $scope.wartistAndTeams_info +="</div>";
+                            $scope.wartistAndTeams_info = $sce.trustAsHtml($scope.wartistAndTeams_info);
+
+                          }
+
+                         }, function myError(response) {
+                           $scope.erroralert_artists = true;
+                        });
+
+                    }//end for loop
+                }//end if show photo tabs
+
+
+                //3 Venue-info Tab
+                $scope.wvenue = "<b><h1 style=\"text-align: center; font-size: 1.4em\">"+ event_json.venue_info +"</h1></b>";
+                $scope.wvenue += "<table class='table table-striped'>";
+                
+                if(event_json.v_addr){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>Address</b></th>";
+                  $scope.wvenue += "<td>" + event_json.v_addr +"</td></tr> ";
+                }
+                if(event_json.v_city && event_json.v_state){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>City</b></th>";
+                  $scope.wvenue += "<td>" + event_json.v_city + ", " + event_json.v_state +"</td></tr> ";
+                }
+                
+                if(event_json.phone_num){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>Phone Number</b></th>";
+                  $scope.wvenue += "<td>" + event_json.phone_num +"</td></tr> ";
+                }
+                if(event_json.open_hour){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>Open Hours</b></th>";
+                  $scope.wvenue += "<td>" + event_json.open_hour +"</td></tr> ";
+                }
+                if(event_json.g_rule){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>General Rule</b></th>";
+                  $scope.wvenue += "<td>" + event_json.g_rule +"</td></tr> ";
+                }
+                if(event_json.c_rule){
+                  $scope.wvenue += "<tr><th style=\' width: 200px\'><b>Child Rule</b></th>";
+                  $scope.wvenue += "<td>" + event_json.c_rule +"</td></tr> ";
+                }
+
+                $scope.wvenue +="</table>"
+                $scope.wvenue = $sce.trustAsHtml($scope.wvenue);
+
+                //4 upcomingevents tab
+                var nvenue_info = event_json.venue_info.replace(/ /g,"+");
+                $scope.wupevents_tables = [];
+                $scope.upeventsprogress = true;
+                $http({
+                  method: 'GET',
+                  // url: 'http://localhost:8081/UpcomingEvents',
+                  url: 'http://siqi-cs571h8-nodejs.us-east-2.elasticbeanstalk.com/UpcomingEvents',
+                  params: {"venue_name": nvenue_info}
+                  }).then(function successCallback(response) {
+
+                    upeventResults = response.data.resultsPage.results.event;
+                    $scope.upeventsprogress = false;
+                    //alert(upeventResults);
+
+                    if(!upeventResults){
+                      //alert(upeventResults);
+                      $scope.upeventNorecords = true;
+                      $scope.upevents_show = false;
+                    }
+
+                    if(upeventResults.length == 0){
+                      //alert("length == 0");
+                      $scope.upeventNorecords = true;
+                      $scope.upevents_show = false;
+                    }
+                    else{
+
+                      for(i = 0; i < upeventResults.length; i++){
+                          var data = new Object();
+
+                          if(upeventResults[i].displayName!= undefined){
+                            data.display_name = upeventResults[i].displayName;
+                          }
+                          if(upeventResults[i].uri!= undefined){
+                            data.display_name_url = upeventResults[i].uri;
+                          }
+                          if(upeventResults[i].performance!= undefined){
+                            data.upevent_artist = upeventResults[i].performance[0].displayName;
+                          }
+                          if(upeventResults[i].start.date!= undefined){
+                            data.upevent_date = moment(upeventResults[i].start.date).format("ll");
+                            data.format_date = upeventResults[i].start.date;
+                          }
+                          if(upeventResults[i].start.time!= undefined){
+                            data.upevent_time = upeventResults[i].start.time;
+                          }
+                          if(upeventResults[i].type!= undefined){
+                            data.upevent_type = upeventResults[i].type;
+                          }
+                          
+                            $scope.wupevents_tables.push(data);
+                    }
+                  }
+
+                  }, function myError(response) {
+                    alert(response);
+                     $scope.erroralert_upevents = true;
+                    $scope.upcomingevents_show = false;
+                    $scope.upevents_show = false;
+                  });                   
+            
+        }//end detail function
+
+      });
+
+
+      
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvjkpUHS76A7gKVMZY0ixaCT2QrWDBfug&callback=initMap">
+    </script>
+
+</html>
