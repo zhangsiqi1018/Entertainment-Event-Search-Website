@@ -1,4 +1,5 @@
 # Entertainment-Event-Search-Website
+
 Main Functions:
 • Designed and implemented a website to search for entertainment event utilizing Bootstrap4, AngularJS, and JQuery.
 
